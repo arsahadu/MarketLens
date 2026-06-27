@@ -1,20 +1,20 @@
-# 📊 MarketLens — Financial Market Data Platform
+# MarketLens — Financial Market Data Platform
 
 > A beginner-to-intermediate Data Engineering project built to learn real-world pipeline concepts.
 
 ---
 
-## 🧠 What is MarketLens?
+## What is MarketLens?
 
 Companies like Zerodha, Groww, and Yahoo Finance all have a **backend data platform** before they can show you charts.  
 MarketLens is a simplified version of that backend — built entirely by you, from scratch.
 
-**We are NOT building:**
+**I'm NOT building:**
 - A trading app
 - A stock prediction model
 - A broker platform
 
-**We ARE building:**
+**Building:**
 - A data pipeline that **ingests** stock data automatically
 - A **PostgreSQL warehouse** that stores it cleanly
 - **Airflow** to orchestrate and schedule everything
@@ -40,7 +40,7 @@ MarketLens is a simplified version of that backend — built entirely by you, fr
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 marketlens/
@@ -63,7 +63,7 @@ marketlens/
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Clone the repo
 ```bash
@@ -91,20 +91,7 @@ This pulls OHLCV data for AAPL, TCS, INFY, and RELIANCE.NS and saves CSVs to `da
 
 ---
 
-## 📅 45-Day Learning Roadmap
-
-| Days     | Milestone                                      | Tech             |
-|----------|------------------------------------------------|------------------|
-| 1 – 7    | Python extractor + raw CSVs                   | Python, yfinance |
-| 8 – 15   | PostgreSQL setup, raw schema, load CSVs       | SQL, PostgreSQL  |
-| 16 – 22  | Docker + Airflow, wrap extractor in a DAG     | Docker, Airflow  |
-| 23 – 30  | SQL transforms, mart schema, Airflow task DAG | SQL, pandas      |
-| 31 – 38  | Power BI connected to PostgreSQL              | Power BI         |
-| 39 – 45  | Polish, README, interview narrative           | Everything       |
-
----
-
-## 🎯 Stocks Tracked
+## Stocks Tracked
 
 | Ticker       | Company              | Market |
 |--------------|----------------------|--------|
