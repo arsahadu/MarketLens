@@ -1,0 +1,17 @@
+# ── Data extraction ──────────────────────────────────────
+yfinance==0.2.54          # Pulls stock data from Yahoo Finance
+
+# ── Data manipulation ────────────────────────────────────
+pandas==2.2.3             # DataFrames — the core tool for any data engineer
+numpy==1.26.4             # Numerical operations
+
+# ── Database ─────────────────────────────────────────────
+psycopg2-binary==2.9.9    # PostgreSQL adapter for Python (used in Phase 2)
+sqlalchemy==2.0.36        # ORM / connection helper (used in Phase 2)
+
+# ── Orchestration (installed separately via Docker later) ─
+# apache-airflow            # We'll install this inside Docker in Phase 3
+
+# ── Utilities ────────────────────────────────────────────
+python-dotenv==1.0.0      # Load secrets from .env file (DB password, API keys)
+loguru==0.7.2             # Better logging than Python's default

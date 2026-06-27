@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+env/
+.venv/
+
+# Data files (raw CSVs can be large — don't commit them)
+data/*.csv
+data/*.parquet
+
+# Power BI
+dashboards/*.pbix
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Airflow
+logs/
+airflow.db
+airflow.cfg
+
+# IDE
+.vscode/
+.idea/
