@@ -23,6 +23,7 @@ Run this from the project root:
 """
 
 import os
+import time
 import yfinance as yf
 import pandas as pd
 from datetime import datetime
@@ -67,12 +68,8 @@ def download_stock(ticker: str, company_name: str) -> pd.DataFrame | None:
     logger.info(f"⬇️  Downloading: {company_name} ({ticker})")
 
     try:
-        # yf.Ticker() creates an object that knows how to talk to Yahoo Finance.
-        stock = yf.Ticker(ticker)
-
-        # .history() fetches the actual price data as a DataFrame.
-        # period="5y" means: give me the last 5 years of daily prices.
-        df = stock.history(period=PERIOD)
+        # Use download() instead of Ticker().history() — more stable, less rate limiting
+        df = yf.download(ticker, period=PERIOD, auto_adjust=True, progress=False)
 
         # If Yahoo Finance returned an empty table, something is wrong with the ticker.
         if df.empty:
@@ -85,10 +82,12 @@ def download_stock(ticker: str, company_name: str) -> pd.DataFrame | None:
         df = df.reset_index()
 
         # Rename columns to lowercase — consistent naming is a DE best practice.
-        df.columns = df.columns.str.lower()
+# yf.download returns MultiIndex columns — flatten them first
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = [col[0].lower() for col in df.columns]
+        else:
+            df.columns = df.columns.str.lower()
 
-        # The "date" column from yfinance comes with timezone info (e.g. "2024-01-05 00:00:00-05:00").
-        # .dt.date strips the time and timezone → clean "2024-01-05" date.
         df["date"] = pd.to_datetime(df["date"]).dt.date
 
         # Add metadata columns so we know which stock each row belongs to.
@@ -173,6 +172,7 @@ def main():
             saved_files.append(filepath)
         else:
             failed_tickers.append(ticker)
+        time.sleep(3)
 
     # ── SUMMARY REPORT ──────────────────────────────────────────────────────
     logger.info("")
