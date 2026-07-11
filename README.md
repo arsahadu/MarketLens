@@ -22,7 +22,7 @@ MarketLens is a simplified version of that backend — built entirely by you, fr
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 [Data Sources]        Yahoo Finance (via yfinance library)
