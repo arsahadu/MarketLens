@@ -1,0 +1,133 @@
+# =============================================================
+# docker-compose.yml
+# MarketLens — Phase 4 (fixed v3)
+# =============================================================
+
+x-airflow-common:
+  &airflow-common
+  image: apache/airflow:2.9.1
+  entrypoint: /bin/bash
+  environment:
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__WEBSERVER__SECRET_KEY: "marketlens-secret-key-2024"
+    AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+    MARKETLENS_DB_HOST: marketlens-db
+    MARKETLENS_DB_PORT: "5432"
+    MARKETLENS_DB_NAME: marketlens
+    MARKETLENS_DB_USER: airflow
+    MARKETLENS_DB_PASSWORD: airflow
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./extractors:/opt/airflow/extractors
+    - ./transformers:/opt/airflow/transformers
+    - ./sql:/opt/airflow/sql
+    - ./data:/opt/airflow/data
+    - ./logs:/opt/airflow/logs
+  depends_on:
+    airflow-db:
+      condition: service_healthy
+
+
+services:
+
+  # ── Your MarketLens PostgreSQL ──────────────────────────────
+  marketlens-db:
+    image: postgres:15
+    container_name: marketlens-postgres
+    environment:
+      POSTGRES_DB: marketlens
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+    ports:
+      - "5433:5432"
+    volumes:
+      - marketlens_db_data:/var/lib/postgresql/data
+      - ./sql/raw/create_raw_schema.sql:/docker-entrypoint-initdb.d/01_raw_schema.sql
+      - ./sql/mart/create_mart_schema.sql:/docker-entrypoint-initdb.d/02_mart_schema.sql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow", "-d", "marketlens"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  # ── Airflow's own PostgreSQL ────────────────────────────────
+  airflow-db:
+    image: postgres:15
+    container_name: airflow-postgres
+    environment:
+      POSTGRES_DB: airflow
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+    ports:
+      - "5434:5432"
+    volumes:
+      - airflow_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow", "-d", "airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  # ── Airflow Init (runs once) ────────────────────────────────
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow-init
+    command:
+      - -c
+      - |
+        pip install yfinance pandas loguru python-dotenv psycopg2-binary --quiet
+        airflow db migrate
+        airflow users create \
+          --username admin \
+          --password admin \
+          --firstname Ahad \
+          --lastname MarketLens \
+          --role Admin \
+          --email ahad@marketlens.com
+        echo "✅ Airflow initialized"
+    restart: "no"
+
+
+  # ── Airflow Webserver ───────────────────────────────────────
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow-webserver
+    command:
+      - -c
+      - |
+        pip install yfinance pandas loguru python-dotenv psycopg2-binary --quiet
+        airflow webserver --port 8080
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    depends_on:
+      airflow-db:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+
+
+  # ── Airflow Scheduler ───────────────────────────────────────
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow-scheduler
+    command:
+      - -c
+      - |
+        pip install yfinance pandas loguru python-dotenv psycopg2-binary --quiet
+        airflow scheduler
+    restart: unless-stopped
+    depends_on:
+      airflow-db:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+
+
+volumes:
+  marketlens_db_data:
+  airflow_db_data:
